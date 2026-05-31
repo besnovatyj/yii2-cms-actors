@@ -1,5 +1,10 @@
 <?php
 
+
+/*
+ * Copyright (c) 2026 Besnovatyj. Licensed under the MIT License.
+ */
+
 use Besnovatyj\Actors\entities\actors\Actor;
 use Besnovatyj\Actors\forms\backend\actors\ActorForm;
 use yii\web\View;

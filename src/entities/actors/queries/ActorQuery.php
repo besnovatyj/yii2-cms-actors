@@ -1,5 +1,10 @@
 <?php
 
+
+/*
+ * Copyright (c) 2026 Besnovatyj. Licensed under the MIT License.
+ */
+
 namespace Besnovatyj\Actors\entities\actors\queries;
 
 use Besnovatyj\Actors\entities\actors\Actor;

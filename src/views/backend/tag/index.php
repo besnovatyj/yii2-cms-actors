@@ -1,5 +1,10 @@
 <?php
 
+
+/*
+ * Copyright (c) 2026 Besnovatyj. Licensed under the MIT License.
+ */
+
 use Besnovatyj\Backend\Widgets\grid\ActionColumn;
 use Besnovatyj\Actors\entities\Tag;
 use Besnovatyj\Actors\forms\backend\search\TagSearch;

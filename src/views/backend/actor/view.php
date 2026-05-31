@@ -1,5 +1,10 @@
 <?php
 
+
+/*
+ * Copyright (c) 2026 Besnovatyj. Licensed under the MIT License.
+ */
+
 use Besnovatyj\Actors\entities\actors\Actor;
 use Besnovatyj\Actors\helpers\ActorHelper;
 use Besnovatyj\Images\widgets\upload\Widget;
