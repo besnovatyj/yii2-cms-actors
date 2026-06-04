@@ -9,9 +9,8 @@ use Besnovatyj\Actors\entities\actors\Actor;
 use Besnovatyj\Actors\entities\Taxonomy;
 use Besnovatyj\Actors\forms\backend\actors\ActorForm;
 use Besnovatyj\TreeManager\Manager\TreeQueryScope;
-use Besnovatyj\File\widgets\customeditor\src\CkeditorCustomWidget;
-use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
+use yii\helpers\Html;
 use yii\web\View;
 
 /* @var $this View */
@@ -75,7 +74,7 @@ use yii\web\View;
                             $editorConfig = [];
                             $editorConfig['language'] = 'ru';
                             $editorConfig['fmDefaultPath'] = '/static/origin/Actors/' . $actor->id;
-                            echo $form->field($model, 'description')->widget(\Besnovatyj\File\widgets\customeditor\src\CkeditorCustomWidget::class, $editorConfig);
+                            echo $form->field($model, 'description')->widget(\Besnovatyj\File\widgets\CkeditorCustomWidget::class, $editorConfig);
                         }
                         ?>
 
