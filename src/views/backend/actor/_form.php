@@ -74,7 +74,7 @@ use yii\web\View;
                             // TODO создавать папку при создании. При удалении удалять.
                             $editorConfig = [];
                             $editorConfig['language'] = 'ru';
-                            $editorConfig['fmDefaultPath'] = '/origin/Actors/' . $actor->id;
+                            $editorConfig['fmDefaultPath'] = '/static/origin/Actors/' . $actor->id;
                             echo $form->field($model, 'description')->widget(\Besnovatyj\File\widgets\customeditor\src\CkeditorCustomWidget::class, $editorConfig);
                         }
                         ?>
