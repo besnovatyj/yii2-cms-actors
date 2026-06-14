@@ -13,7 +13,8 @@
   "minimum-stability": "stable",
   "extra": {
     "moduleClass": "Besnovatyj\\Actors\\Module",
-    "moduleId": "Actors"
+    "moduleId": "Actors",
+    "bescms": { "kind": "module" }
   },
   "keywords": [
     "yii2",
