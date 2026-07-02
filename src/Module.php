@@ -7,11 +7,11 @@
 namespace Besnovatyj\Actors;
 
 use common\components\module\CmsModule;
-use modules\modman\contract\DeclaresModule;
-use modules\modman\contract\ProvidesAdminMenu;
-use modules\modman\contract\ProvidesDependencies;
-use modules\modman\contract\ProvidesMigrations;
-use modules\modman\contract\ProvidesOptions;
+use Besnovatyj\Contracts\module\DeclaresModule;
+use Besnovatyj\Contracts\module\ProvidesAdminMenu;
+use Besnovatyj\Contracts\module\ProvidesDependencies;
+use Besnovatyj\Contracts\module\ProvidesMigrations;
+use Besnovatyj\Contracts\module\ProvidesOptions;
 
 class Module extends CmsModule implements
     DeclaresModule, ProvidesMigrations,
