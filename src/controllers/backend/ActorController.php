@@ -16,7 +16,7 @@ use Besnovatyj\Actors\image\ActorImageOwner;
 use Besnovatyj\Actors\repositories\ActorRepository;
 use Besnovatyj\Actors\services\manage\ActorManageService;
 use Besnovatyj\Images\helpers\ImageActionsMap;
-use common\components\controller\ControllerTrait;
+use Besnovatyj\Kernel\controller\ControllerTrait;
 use Besnovatyj\Kernel\urlmanager\UrlManagerHelperTrait;
 use DomainException;
 use Exception;
