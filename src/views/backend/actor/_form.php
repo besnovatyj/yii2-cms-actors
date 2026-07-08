@@ -74,7 +74,7 @@ use yii\web\View;
                             $editorConfig = [];
                             $editorConfig['language'] = 'ru';
                             $editorConfig['fmDefaultPath'] = '/static/origin/Actors/' . $actor->id;
-                            echo $form->field($model, 'description')->widget(\Besnovatyj\File\widgets\CkeditorCustomWidget::class, $editorConfig);
+                            echo $form->field($model, 'description')->widget(\Besnovatyj\Editor\EditorWidget::class, $editorConfig);
                         }
                         ?>
 
