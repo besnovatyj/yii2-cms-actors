@@ -42,7 +42,7 @@ class TaxonomyReadRepository
         return Taxonomy::find()->andWhere(['slug' => $slug])->one();
     }
 
-    public function getTreeWithSubsOf(Taxonomy $taxonomy = null): array
+    public function getTreeWithSubsOf(?Taxonomy $taxonomy = null): array
     {
         $query = Taxonomy::find()->andWhere(['status' => 1])->orderBy(['lft' => SORT_ASC]);
         if ($taxonomy) {
