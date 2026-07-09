@@ -39,7 +39,7 @@ class ActorController extends Controller
         $dataProvider = $this->actors->getAll();
         $taxonomy = $this->taxonomies->getRoot();
 
-        return $this->render('/frontend/actor/index', [
+        return $this->render('index', [
             'taxonomy' => $taxonomy,
             'dataProvider' => $dataProvider,
         ]);
@@ -58,7 +58,7 @@ class ActorController extends Controller
 
         $dataProvider = $this->actors->getAllByTaxonomy($taxonomy);
 
-        return $this->render('/frontend/actor/taxonomy', [
+        return $this->render('taxonomy', [
             'taxonomy' => $taxonomy,
             'dataProvider' => $dataProvider,
         ]);
@@ -77,7 +77,7 @@ class ActorController extends Controller
 
         $dataProvider = $this->actors->getAllByTag($tag);
 
-        return $this->render('/frontend/actor/tag', [
+        return $this->render('tag', [
             'tag' => $tag,
             'dataProvider' => $dataProvider,
         ]);
@@ -94,7 +94,7 @@ class ActorController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
 
-        return $this->render('/frontend/actor/view', [
+        return $this->render('view', [
             'actor' => $actor,
         ]);
     }
