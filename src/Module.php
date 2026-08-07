@@ -13,11 +13,15 @@ use Besnovatyj\Contracts\module\ProvidesAdminMenu;
 use Besnovatyj\Contracts\module\ProvidesDependencies;
 use Besnovatyj\Contracts\module\ProvidesMigrations;
 use Besnovatyj\Contracts\module\ProvidesOptions;
+use Besnovatyj\Contracts\menu\MenuTarget;
+use Besnovatyj\Contracts\menu\MenuTargetProvider;
+use Besnovatyj\Actors\entities\Taxonomy;
+use Besnovatyj\TreeManager\Manager\TreeQueryScope;
 
 class Module extends CmsModule implements
     DeclaresModule, ProvidesMigrations,
     ProvidesAdminMenu, ProvidesOptions,
-    ProvidesDependencies, ProvidesDirectories
+    ProvidesDependencies, ProvidesDirectories, MenuTargetProvider
 {
     public const bool EDITABLE = true;
     public const string VERSION = '1.0.0';
@@ -33,5 +37,41 @@ class Module extends CmsModule implements
     public static function migrationPath(): string { return __DIR__.'/migrations'; }
     public static function migrationNamespace(): ?string { return __NAMESPACE__.'\\migrations'; }
     public static function directories(): array { return ['@static/origin/Actors','@static/cache/Actors'];}
+
+    /**
+     * Цели для построения пунктов меню. Реализация {@see MenuTargetProvider};
+     * вызывается только модулем меню, если он установлен.
+     *
+     * @return MenuTarget[]
+     */
+    public function menuTargets(): array
+    {
+        return [
+            new MenuTarget('/Actors/actor/taxonomy', 'Таксономия актёров', 'slug'),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return array<string,string>
+     */
+    public function menuCandidates(string $route): array
+    {
+        return match (ltrim($route, '/')) {
+            'Actors/actor/taxonomy' => $this->taxonomySlugMap(),
+            default => [],
+        };
+    }
+
+    /**
+     * Карта `slug => подпись` (с отступом по глубине дерева) для таксономий актёров.
+     *
+     * @return array<string,string>
+     */
+    private function taxonomySlugMap(): array
+    {
+        return (new TreeQueryScope(Taxonomy::class))->dropdownTree(keyAttribute: 'slug', indent: '— ');
+    }
 
 }
