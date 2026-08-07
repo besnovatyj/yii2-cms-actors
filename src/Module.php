@@ -71,7 +71,7 @@ class Module extends CmsModule implements
      */
     private function taxonomySlugMap(): array
     {
-        return (new TreeQueryScope(Taxonomy::class))->dropdownTree(keyAttribute: 'slug', indent: '— ');
+        return new TreeQueryScope(Taxonomy::class)->dropdownTree(keyAttribute: 'slug', indent: '— ');
     }
 
 }
