@@ -13,16 +13,16 @@ use Besnovatyj\Actors\entities\actors\Actor;
 use Besnovatyj\Actors\entities\actors\Image;
 use Besnovatyj\Actors\repositories\ActorRepository;
 use Besnovatyj\Images\contracts\ImageOwnerInterface;
-use Besnovatyj\Images\contracts\NullImageOwnerTrait;
 use yii\db\Exception;
 
 /**
  * Адаптер Actor к ImageOwnerInterface.
+ *
+ * Реализует pessimistic lock через PessimisticLockBehavior Actor,
+ * чтобы исключить race condition при параллельной загрузке фотографий.
  */
 readonly class ActorImageOwner implements ImageOwnerInterface
 {
-    use NullImageOwnerTrait;
-
     public function __construct(
         private Actor           $actor,
         private ActorRepository $repository,
@@ -73,7 +73,7 @@ readonly class ActorImageOwner implements ImageOwnerInterface
     }
 
     /**
-     * Блокирует строку галереи (SELECT FOR UPDATE) до конца транзакции.
+     * Блокирует строку актёра (SELECT FOR UPDATE) до конца транзакции.
      *
      * Исключает race condition при параллельной загрузке нескольких файлов.
      * @throws Exception
@@ -84,7 +84,7 @@ readonly class ActorImageOwner implements ImageOwnerInterface
     }
 
     /**
-     * Обновляет данные галереи из БД после применения блокировки.
+     * Обновляет данные актёра из БД после применения блокировки.
      */
     public function refreshOwner(): void
     {
