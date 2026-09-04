@@ -15,7 +15,7 @@ use yii\web\View;
 /* @var $thumbProfile string Имя профиля превью главной фотографии */
 
 // Базовый размер превью; множитель применяет виджет через --sortable-list-scale
-$previewStyle = '--sortable-list-preview-width: 70px; --sortable-list-preview-height: 100px;';
+$previewStyle = '--sortable-list-preview-width: 100px; --sortable-list-preview-height: 100px;';
 ?>
 <div class="d-flex align-items-center gap-3">
     <?php if ($actor->mainImage): ?>
