@@ -33,6 +33,7 @@ use yii\db\StaleObjectException;
  * @property integer $taxonomy_id
  * @property integer $main_image_id
  * @property integer $status
+ * @property integer $sort
  *
  * @property Meta $meta
  * @property Taxonomy $taxonomy
@@ -76,6 +77,17 @@ class Actor extends ActiveRecord implements AggregateRoot
     public function changeMainTaxonomy($taxonomyId): void
     {
         $this->taxonomy_id = $taxonomyId;
+    }
+
+    /**
+     * Задаёт позицию актёра в ручной сортировке.
+     *
+     * Значение назначается снаружи (сервисом), потому что позиция осмысленна только
+     * относительно остальных актёров — сама сущность соседей не знает.
+     */
+    public function changeSort(int $sort): void
+    {
+        $this->sort = $sort;
     }
 
     // <editor-fold desc="Statuses and flags">

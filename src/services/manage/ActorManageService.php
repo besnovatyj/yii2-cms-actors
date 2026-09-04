@@ -67,6 +67,10 @@ class ActorManageService
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
+            // Новый актёр встаёт в конец ручного порядка: позиция по умолчанию (0)
+            // у всех новых записей одинакова, и порядок между ними определяла бы база
+            $actor->changeSort($this->actors->nextSort());
+
             $this->actors->save($actor);
             $this->assignTags($actor, $form->tags->newTagsNames);
 

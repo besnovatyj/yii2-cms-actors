@@ -32,7 +32,9 @@ class ActorReadRepository
 
     public function getAllByRange(int $offset, int $limit): array
     {
-        return Actor::find()->alias('p')->active('p')->orderBy(['sort' => SORT_ASC])->limit($limit)->offset($offset)->all();
+        return Actor::find()->alias('p')->active('p')
+            ->orderBy(['p.sort' => SORT_ASC, 'p.id' => SORT_ASC])
+            ->limit($limit)->offset($offset)->all();
     }
 
     public function getAllIterator(): iterable
@@ -86,8 +88,14 @@ class ActorReadRepository
         return new ActiveDataProvider([
             'query' => $query,
             'sort' => [
-                'defaultOrder' => ['id' => SORT_DESC],
+                // Порядок фронтэнда — ручной; id вторичным ключом, иначе записи
+                // с одинаковым sort выстраивались бы произвольно
+                'defaultOrder' => ['sort' => SORT_ASC],
                 'attributes' => [
+                    'sort' => [
+                        'asc' => ['p.sort' => SORT_ASC, 'p.id' => SORT_ASC],
+                        'desc' => ['p.sort' => SORT_DESC, 'p.id' => SORT_DESC],
+                    ],
                     'id' => [
                         'asc' => ['p.id' => SORT_ASC],
                         'desc' => ['p.id' => SORT_DESC],

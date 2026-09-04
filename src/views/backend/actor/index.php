@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <p>
     <?= Html::a('Create', ['create'], ['class' => 'btn  btn-success']) ?>
+    <?= Html::a('<i class="bi bi-arrow-down-up"></i> Порядок', ['sort'], ['class' => 'btn  btn-secondary']) ?>
 </p>
 
 <div class="card">
@@ -56,6 +57,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     'attribute' => 'taxonomy_id',
                     'filter' => new TreeQueryScope(Taxonomy::class)->dropdownTree(),
                     'value' => 'taxonomy.name',
+                ],
+                [
+                    // Позиция ручного порядка: только для чтения, меняется на экране «Порядок»
+                    'attribute' => 'sort',
+                    'filter' => false,
+                    'contentOptions' => ['class' => 'text-end'],
                 ],
                 [
                     'attribute' => 'status',

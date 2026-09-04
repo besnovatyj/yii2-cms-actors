@@ -43,6 +43,8 @@ class m241022_195300_create_actors_actors_table extends BaseMigration
                 ->comment('Идентификатор основной фотографии актёра'),
             'status' => $this->smallInteger(1)->notNull()->defaultValue(0)
                 ->comment('Статус отображения актёра'),
+            'sort' => $this->integer(10)->notNull()->defaultValue(0)
+                ->comment('Порядок ручной сортировки актёра'),
             'meta_json' => $this->text()->notNull()
                 ->comment('JSON of meta-obj'),
         ], $this->tableOptions);
@@ -50,6 +52,7 @@ class m241022_195300_create_actors_actors_table extends BaseMigration
 
         $this->createIndexes(static::TABLE_NAME, 'taxonomy_id');
         $this->createIndexes(static::TABLE_NAME, 'main_image_id');
+        $this->createIndexes(static::TABLE_NAME, 'sort');
 
         parent::safeUp();
     }
