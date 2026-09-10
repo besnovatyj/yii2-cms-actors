@@ -8,6 +8,7 @@
 namespace Besnovatyj\Actors\readModels;
 
 use Besnovatyj\Actors\entities\Taxonomy;
+use Besnovatyj\Contracts\search\SearchDocument;
 use Besnovatyj\TreeManager\Manager\TreeQueryScope;
 
 class TaxonomyReadRepository
@@ -40,6 +41,29 @@ class TaxonomyReadRepository
     public function findBySlug($slug): ?Taxonomy
     {
         return Taxonomy::find()->andWhere(['slug' => $slug])->one();
+    }
+
+    /**
+     * Разделы актёров для сквозного поиска — только видимые целиком, вместе с предками
+     * ({@see \Besnovatyj\Actors\entities\queries\TaxonomyQuery::visible()}).
+     *
+     * @return iterable<SearchDocument>
+     */
+    public function searchDocuments(): iterable
+    {
+        $query = Taxonomy::find()->visible()->orderBy(['id' => SORT_ASC]);
+
+        /** @var Taxonomy $taxonomy */
+        foreach ($query->each(100) as $taxonomy) {
+            yield new SearchDocument(
+                type: 'actors.taxonomy',
+                entityId: (int)$taxonomy->id,
+                route: '/Actors/actor/taxonomy',
+                params: ['slug' => $taxonomy->slug],
+                title: (string)$taxonomy->name,
+                text: (string)$taxonomy->description,
+            );
+        }
     }
 
     public function getTreeWithSubsOf(?Taxonomy $taxonomy = null): array

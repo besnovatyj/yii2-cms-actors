@@ -31,7 +31,21 @@ use yii\db\ActiveQuery;
  */
 class Taxonomy extends Node
 {
+    /** Раздел снят с публикации: не показывается на фронте и не участвует в поиске. */
+    public const int STATUS_INACTIVE = 0;
+
+    /** Раздел опубликован. */
+    public const int STATUS_ACTIVE = 1;
+
     public Meta $meta;
+
+    /**
+     * Опубликован ли раздел сам по себе (без учёта предков — см. {@see TaxonomyQuery::visible()}).
+     */
+    public function isActive(): bool
+    {
+        return (int)$this->status === self::STATUS_ACTIVE;
+    }
 
     public static function create($name, $slug, $description, Meta $meta): self
     {

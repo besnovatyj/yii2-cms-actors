@@ -10,6 +10,7 @@ namespace Besnovatyj\Actors\readModels;
 use Besnovatyj\Actors\entities\Taxonomy;
 use Besnovatyj\Actors\entities\actors\Actor;
 use Besnovatyj\Actors\entities\Tag;
+use Besnovatyj\Contracts\search\SearchDocument;
 use Besnovatyj\TreeManager\Manager\TreeQueryScope;
 use yii\data\ActiveDataProvider;
 use yii\data\DataProviderInterface;
@@ -81,6 +82,45 @@ class ActorReadRepository
         /** @var $actors Actor */
         $actors = Actor::find()->active()->andWhere(['id' => $id])->one();
         return $actors;
+    }
+
+    /**
+     * Актёры для сквозного поиска — только публично доступные ({@see ActorQuery::visible()}).
+     *
+     * Генератор с чтением пачками: полная переиндексация не должна держать в памяти всех актёров
+     * сразу. Поля отдаются СЫРЫМИ (HTML не чистится, шорткоды не раскрываются) — нормализация
+     * едина для всех модулей и выполняется модулем поиска.
+     *
+     * @return iterable<SearchDocument>
+     */
+    public function searchDocuments(): iterable
+    {
+        $query = Actor::find()->alias('p')->visible('p')
+            ->with(['tags', 'taxonomy', 'mainImage'])
+            ->orderBy(['p.id' => SORT_ASC]);
+
+        /** @var Actor $actor */
+        foreach ($query->each(100) as $actor) {
+            $keywords = array_map(static fn (Tag $tag): string => (string)$tag->name, $actor->tags);
+
+            if ($actor->taxonomy !== null) {
+                $keywords[] = (string)$actor->taxonomy->name;
+            }
+
+            yield new SearchDocument(
+                type: 'actors.actor',
+                entityId: (int)$actor->id,
+                route: '/Actors/actor/view',
+                params: ['id' => (int)$actor->id],
+                title: (string)$actor->name,
+                text: (string)$actor->description,
+                keywords: implode(' ', $keywords),
+                // `created_at` — колонка DATETIME, а контракт ждёт Unix-timestamp: приведение
+                // (int) молча дало бы год вместо даты (грабли, уже пойманные в блоге).
+                date: $actor->created_at === null ? null : (strtotime((string)$actor->created_at) ?: null),
+                image: $actor->mainImage?->getThumbUrl('file', 'frontend_list'),
+            );
+        }
     }
 
     private function getProvider(ActiveQuery $query): ActiveDataProvider

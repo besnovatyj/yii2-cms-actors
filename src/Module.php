@@ -15,13 +15,17 @@ use Besnovatyj\Contracts\module\ProvidesMigrations;
 use Besnovatyj\Contracts\module\ProvidesOptions;
 use Besnovatyj\Contracts\menu\MenuTarget;
 use Besnovatyj\Contracts\menu\MenuTargetProvider;
+use Besnovatyj\Contracts\search\SearchSource;
+use Besnovatyj\Contracts\search\SearchableProvider;
 use Besnovatyj\Actors\entities\Taxonomy;
+use Besnovatyj\Actors\readModels\ActorReadRepository;
+use Besnovatyj\Actors\readModels\TaxonomyReadRepository;
 use Besnovatyj\TreeManager\Manager\TreeQueryScope;
 
 class Module extends CmsModule implements
     DeclaresModule, ProvidesMigrations,
     ProvidesAdminMenu, ProvidesOptions,
-    ProvidesDependencies, ProvidesDirectories, MenuTargetProvider
+    ProvidesDependencies, ProvidesDirectories, MenuTargetProvider, SearchableProvider
 {
     public const bool EDITABLE = true;
     public const string VERSION = '1.0.0';
@@ -72,6 +76,32 @@ class Module extends CmsModule implements
     private function taxonomySlugMap(): array
     {
         return new TreeQueryScope(Taxonomy::class)->dropdownTree(keyAttribute: 'slug', indent: '— ');
+    }
+
+    /**
+     * Контент модуля для сквозного поиска. Реализация {@see SearchableProvider}; вызывается
+     * только модулем поиска, если он установлен.
+     *
+     * @return SearchSource[]
+     */
+    public function searchSources(): array
+    {
+        return [
+            new SearchSource('actors.actor', 'Актёры', 1.0, 'bi bi-person-badge'),
+            new SearchSource('actors.taxonomy', 'Разделы актёров', 0.7, 'bi bi-diagram-3'),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function searchDocuments(string $type): iterable
+    {
+        return match ($type) {
+            'actors.actor' => new ActorReadRepository()->searchDocuments(),
+            'actors.taxonomy' => new TaxonomyReadRepository()->searchDocuments(),
+            default => [],
+        };
     }
 
 }
