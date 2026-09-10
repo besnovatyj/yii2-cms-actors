@@ -28,30 +28,30 @@ class ActorReadRepository
 
     public function count(): int
     {
-        return Actor::find()->active()->count();
+        return Actor::find()->visible()->count();
     }
 
     public function getAllByRange(int $offset, int $limit): array
     {
-        return Actor::find()->alias('p')->active('p')
+        return Actor::find()->alias('p')->visible('p')
             ->orderBy(['p.sort' => SORT_ASC, 'p.id' => SORT_ASC])
             ->limit($limit)->offset($offset)->all();
     }
 
     public function getAllIterator(): iterable
     {
-        return Actor::find()->alias('p')->active('p')->with('mainImage', 'brand')->each();
+        return Actor::find()->alias('p')->visible('p')->with('mainImage', 'brand')->each();
     }
 
     public function getAll(): DataProviderInterface
     {
-        $query = Actor::find()->alias('p')->active('p')->with('mainImage');
+        $query = Actor::find()->alias('p')->visible('p')->with('mainImage');
         return $this->getProvider($query);
     }
 
     public function getAllByTaxonomy(Taxonomy $taxonomy): DataProviderInterface
     {
-        $query = Actor::find()->alias('p')->active('p')->with('mainImage', 'taxonomy');
+        $query = Actor::find()->alias('p')->visible('p')->with('mainImage', 'taxonomy');
         $ids = $this->treeScope->descendantIds($taxonomy, andSelf: true);
         $query->andWhere(['p.taxonomy_id' => $ids]);
         $query->groupBy('p.id');
@@ -60,7 +60,7 @@ class ActorReadRepository
 
     public function getAllByTag(Tag $tag): DataProviderInterface
     {
-        $query = Actor::find()->alias('p')->active('p')->with('mainImage');
+        $query = Actor::find()->alias('p')->visible('p')->with('mainImage');
         $query->joinWith(['tagAssignments ta'], false);
         $query->andWhere(['ta.tag_id' => $tag->id]);
         $query->groupBy('p.id');
@@ -74,13 +74,13 @@ class ActorReadRepository
 
     public function getRand($limit): array
     {
-        return Actor::find()->active()->orderBy(new Expression('rand()'))->limit($limit)->all();
+        return Actor::find()->visible()->orderBy(new Expression('rand()'))->limit($limit)->all();
     }
 
     public function find(int $id): ?Actor
     {
         /** @var $actors Actor */
-        $actors = Actor::find()->active()->andWhere(['id' => $id])->one();
+        $actors = Actor::find()->visible()->andWhere(['id' => $id])->one();
         return $actors;
     }
 

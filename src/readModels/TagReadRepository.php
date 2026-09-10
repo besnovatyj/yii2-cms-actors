@@ -9,6 +9,7 @@ namespace Besnovatyj\Actors\readModels;
 
 use Besnovatyj\Actors\entities\actors\TagAssignment;
 use Besnovatyj\Actors\entities\Tag;
+use Besnovatyj\Actors\entities\actors\Actor;
 
 class TagReadRepository
 {
@@ -35,8 +36,12 @@ class TagReadRepository
          * SELECT * FROM `blog_tags` JOIN (SELECT `tag_id`, COUNT(tag_id) AS `frequency` FROM `blog_tag_asgmt` GROUP BY `tag_id` ORDER BY `frequency` DESC LIMIT 6) t ON `blog_tags`.`id`=`t`.`tag_id`
          */
 
+        // Частота считается ТОЛЬКО по видимым записям: тег, все записи которого сняты с
+        // публикации (или лежат в скрытом разделе), не должен попадать в облако — иначе
+        // посетитель переходит по нему на пустую страницу и узнаёт о скрытом контенте.
         $subQuery = TagAssignment::find()->alias('ta')
             ->select(['tag_id', 'COUNT(tag_id) AS frequency'])
+            ->andWhere(['ta.actor_id' => Actor::find()->visible()->select('id')])
             ->groupBy('ta.tag_id')
             ->orderBy(['frequency' => SORT_DESC])
             ->limit($count);
