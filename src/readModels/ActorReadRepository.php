@@ -11,6 +11,7 @@ use Besnovatyj\Actors\entities\Taxonomy;
 use Besnovatyj\Actors\entities\actors\Actor;
 use Besnovatyj\Actors\entities\Tag;
 use Besnovatyj\Contracts\search\SearchDocument;
+use Besnovatyj\Contracts\sitemap\SitemapUrl;
 use Besnovatyj\TreeManager\Manager\TreeQueryScope;
 use yii\data\ActiveDataProvider;
 use yii\data\DataProviderInterface;
@@ -152,5 +153,51 @@ class ActorReadRepository
                 'pageSizeParam' => false,
             ]
         ]);
+    }
+
+
+    /**
+     * Актёры для карты сайта.
+     *
+     * Тот же инвариант, что у поиска, — только публично доступное ({@see ActorQuery::visible()}).
+     * Отличается набор полей: карте нужны имя (для человеческой карты) и дата ИЗМЕНЕНИЯ, по которой
+     * краулер решает, перечитывать ли страницу; поиску — описание, теги и дата публикации. Поэтому
+     * два тонких метода поверх одной выборки, а не один «универсальный».
+     *
+     * Порядок — как в списке на сайте: сначала заданный редактором, потом по идентификатору.
+     *
+     * @return iterable<SitemapUrl>
+     */
+    public function sitemapUrls(): iterable
+    {
+        $query = Actor::find()->alias('p')->visible('p')
+            ->orderBy(['p.sort' => SORT_ASC, 'p.id' => SORT_ASC]);
+
+        /** @var Actor $actor */
+        foreach ($query->each(200) as $actor) {
+            yield new SitemapUrl(
+                route: '/Actors/actor/view',
+                params: ['id' => (int)$actor->id],
+                title: (string)$actor->name,
+                // updated_at — колонка DATETIME, а контракт ждёт Unix-timestamp.
+                lastModified: $actor->updated_at === null ? null : (strtotime((string)$actor->updated_at) ?: null),
+            );
+        }
+    }
+
+    /**
+     * Отпечаток состояния актёров для карты сайта: сколько их и когда правили последний раз.
+     *
+     * Одного `MAX(updated_at)` мало — он не замечает удаления записи, а удалённая страница обязана
+     * исчезнуть из карты. Пара «сколько + когда» это закрывает и стоит одного запроса.
+     */
+    public function sitemapRevision(): string
+    {
+        $row = Actor::find()->alias('p')->visible('p')
+            ->select(['total' => 'COUNT(*)', 'latest' => 'MAX(p.updated_at)'])
+            ->asArray()
+            ->one();
+
+        return ((string)($row['total'] ?? '0')) . ':' . ((string)($row['latest'] ?? ''));
     }
 }
