@@ -42,17 +42,7 @@ class m241022_195630_create_actors_foreign_key_constraints extends BaseMigration
             m241022_195240_create_actors_images_table::TABLE_NAME,
             'id', 'SET NULL');
 
-        // Связь актёра с тегами
-        $this->createFKs(
-            m241022_195530_create_actors_tag_asgmt_table::TABLE_NAME,
-            'actor_id',
-            m241022_195300_create_actors_actors_table::TABLE_NAME,
-            'id', 'CASCADE');
-        $this->createFKs(
-            m241022_195530_create_actors_tag_asgmt_table::TABLE_NAME,
-            'tag_id',
-            m241022_195235_create_actors_tags_table::TABLE_NAME,
-            'id', 'CASCADE');
+        // Теги — в общем модуле Tags (полиморфная таблица связей без FK на актёров), здесь их больше нет.
 
         Yii::$app->db->createCommand('SET foreign_key_checks = 1')->execute();
 

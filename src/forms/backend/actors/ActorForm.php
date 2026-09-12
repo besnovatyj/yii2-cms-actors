@@ -7,6 +7,7 @@
 
 namespace Besnovatyj\Actors\forms\backend\actors;
 
+use Besnovatyj\Tags\forms\backend\TagsForm;
 use Besnovatyj\Forms\CompositeForm;
 use Besnovatyj\Meta\MetaForm;
 use Besnovatyj\Actors\entities\actors\Actor;
@@ -30,7 +31,7 @@ class ActorForm extends CompositeForm
             $this->status = $actor->status;
             $this->meta = new MetaForm($actor->meta);
             $this->taxonomies = new TaxonomiesForm($actor);
-            $this->tags = new TagsForm($actor);
+            $this->tags = new TagsForm($actor->tags);
         } else {
             $this->meta = new MetaForm();
             $this->taxonomies = new TaxonomiesForm();

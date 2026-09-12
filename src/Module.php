@@ -22,6 +22,9 @@ use Besnovatyj\Contracts\sitemap\SitemapFreshness;
 use Besnovatyj\Contracts\sitemap\SitemapProvider;
 use Besnovatyj\Contracts\sitemap\SitemapSection;
 use Besnovatyj\Contracts\sitemap\SitemapUrl;
+use Besnovatyj\Contracts\tags\TaggableProvider;
+use Besnovatyj\Contracts\tags\TagSource;
+use Besnovatyj\Actors\entities\actors\Actor;
 use Besnovatyj\Actors\entities\Taxonomy;
 use Besnovatyj\Actors\readModels\ActorReadRepository;
 use Besnovatyj\Actors\readModels\TaxonomyReadRepository;
@@ -31,7 +34,7 @@ class Module extends CmsModule implements
     DeclaresModule, ProvidesMigrations,
     ProvidesAdminMenu, ProvidesOptions,
     ProvidesDependencies, ProvidesDirectories, MenuTargetProvider, SearchableProvider,
-    SitemapProvider, SitemapFreshness
+    SitemapProvider, SitemapFreshness, TaggableProvider
 {
     public const bool EDITABLE = true;
     public const string VERSION = '1.0.0';
@@ -110,6 +113,41 @@ class Module extends CmsModule implements
         };
     }
 
+
+    /**
+     * Актёры — участники общего словаря тегов. Реализация {@see TaggableProvider}; вызывается модулем
+     * тегов для страницы `/tag/<slug>` и облака. Ключ — тот же `actors.actor`, что у поиска и карты.
+     *
+     * @return TagSource[]
+     */
+    public function tagSources(): array
+    {
+        return [
+            new TagSource(Actor::tagType(), 'Актёры', 'bi bi-person-badge'),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function visibleTaggedIds(string $type, array $ids): array
+    {
+        return match ($type) {
+            Actor::tagType() => new ActorReadRepository()->visibleIds($ids),
+            default => [],
+        };
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function taggedItems(string $type, array $ids): iterable
+    {
+        return match ($type) {
+            Actor::tagType() => new ActorReadRepository()->taggedItems($ids),
+            default => [],
+        };
+    }
 
     /**
      * Разделы карты сайта. Реализация {@see SitemapProvider}; вызывается только модулем карты,

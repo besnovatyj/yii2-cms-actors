@@ -48,25 +48,4 @@ return [
         ],
     ],
 
-    // Tags
-    [
-        'label' => 'Tags',
-        'iconClass' => 'bi bi-tags me-1',
-        'url' => ['/Actors/backend/tag/index'],
-        'active' => static function () {
-            return str_contains(\Yii::$app->request->url, 'Actors/backend/tag');
-        },
-        '_meta' => [
-            'placements' => [
-                [
-                    'location' => 'left-sidebar',
-                    'group' => 'Actor',
-                    'groupIcon' => 'bi bi-person-square',
-                    'priority' => 100,
-                    'groupPriority' => 100,
-                ],
-            ],
-        ],
-    ],
-
 ];

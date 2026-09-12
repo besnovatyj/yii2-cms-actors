@@ -17,7 +17,9 @@ use Besnovatyj\Meta\Meta;
 use Besnovatyj\DomainEvents\EventTrait;
 use Besnovatyj\Actors\entities\Taxonomy;
 use Besnovatyj\Actors\entities\actors\queries\ActorQuery;
-use Besnovatyj\Actors\entities\Tag;
+use Besnovatyj\Tags\entities\Tag;
+use Besnovatyj\Tags\entities\TagAssignment;
+use Besnovatyj\Tags\entities\TaggableEntityTrait;
 use Throwable;
 use Yii;
 use yii\db\ActiveQuery;
@@ -47,6 +49,7 @@ use yii\db\StaleObjectException;
 class Actor extends ActiveRecord implements AggregateRoot
 {
     use EventTrait;
+    use TaggableEntityTrait;
 
     public const int STATUS_DRAFT = 0;
     public const int STATUS_ACTIVE = 1;
@@ -142,14 +145,13 @@ class Actor extends ActiveRecord implements AggregateRoot
         return $this->hasOne(Taxonomy::class, ['id' => 'taxonomy_id']);
     }
 
-    public function getTagAssignments(): ActiveQuery
+    /**
+     * Ключ актёра в общем словаре тегов (модуль Tags); тот же — в контрактах поиска и карты сайта.
+     * Связи `tagAssignments`/`tags` даёт {@see TaggableEntityTrait}.
+     */
+    public static function tagType(): string
     {
-        return $this->hasMany(TagAssignment::class, ['actor_id' => 'id']);
-    }
-
-    public function getTags(): ActiveQuery
-    {
-        return $this->hasMany(Tag::class, ['id' => 'tag_id'])->via('tagAssignments');
+        return 'actors.actor';
     }
 
     public function getImages(): ActiveQuery

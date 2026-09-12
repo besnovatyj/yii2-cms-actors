@@ -11,16 +11,13 @@ namespace Besnovatyj\Actors\services\manage;
 
 use Besnovatyj\Meta\Meta;
 use Besnovatyj\Actors\entities\actors\Actor;
-use Besnovatyj\Actors\entities\actors\TagAssignment;
-use Besnovatyj\Actors\entities\Tag;
 use Besnovatyj\Actors\forms\backend\actors\ActorForm;
 use Besnovatyj\Actors\repositories\ActorRepository;
-use Besnovatyj\Actors\repositories\TagRepository;
 use Besnovatyj\Actors\repositories\TaxonomyRepository;
+use Besnovatyj\Tags\services\TagAssigner;
 use Throwable;
 use Yii;
 use yii\db\Exception;
-use yii\helpers\Inflector;
 
 /**
  * Сервис управления актёрами.
@@ -33,12 +30,13 @@ class ActorManageService
 {
     private ActorRepository $actors;
     private TaxonomyRepository $taxonomies;
-    private TagRepository $tags;
+    /** Теги — общий словарь модуля Tags: связи пишет только он, slug из имени выводит его форма. */
+    private TagAssigner $tags;
 
     public function __construct(
         ActorRepository    $actors,
         TaxonomyRepository $taxonomies,
-        TagRepository      $tags
+        TagAssigner        $tags
     ) {
         $this->actors = $actors;
         $this->taxonomies = $taxonomies;
@@ -72,7 +70,7 @@ class ActorManageService
             $actor->changeSort($this->actors->nextSort());
 
             $this->actors->save($actor);
-            $this->assignTags($actor, $form->tags->newTagsNames);
+            $this->tags->sync(Actor::tagType(), (int)$actor->id, $form->tags->items);
 
             $transaction->commit();
             return $actor;
@@ -106,8 +104,7 @@ class ActorManageService
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $this->actors->save($actor);
-            $this->revokeTags($actor);
-            $this->assignTags($actor, $form->tags->newTagsNames);
+            $this->tags->sync(Actor::tagType(), (int)$actor->id, $form->tags->items);
 
             $transaction->commit();
         } catch (Throwable $e) {
@@ -145,7 +142,8 @@ class ActorManageService
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            $this->revokeTags($actor);
+            // Внешнего ключа на актёра у общих связей тегов нет — снимаем явно, иначе останутся сироты.
+            $this->tags->detachAll(Actor::tagType(), (int)$actor->id);
             $this->removeImages($actor);
 
             $this->actors->remove($actor);
@@ -158,43 +156,6 @@ class ActorManageService
     }
 
     // ==================== Private methods ====================
-
-    /**
-     * @throws Exception
-     */
-    private function assignTags(Actor $actor, array $tagNames): void
-    {
-        foreach ($tagNames as $tagName) {
-            $slug = Inflector::slug($tagName);
-
-            $tag = $this->tags->findBySlug($slug);
-            if (!$tag) {
-                $tag = Tag::create($tagName, $slug);
-                $this->tags->save($tag);
-            }
-
-            $exists = TagAssignment::find()
-                ->andWhere(['actor_id' => $actor->id, 'tag_id' => $tag->id])
-                ->exists();
-
-            if ($exists) {
-                continue;
-            }
-
-            $assignment = new TagAssignment();
-            $assignment->actor_id = $actor->id;
-            $assignment->tag_id = $tag->id;
-
-            if (!$assignment->save()) {
-                throw new Exception('Failed to save tag assignment.');
-            }
-        }
-    }
-
-    private function revokeTags(Actor $actor): void
-    {
-        TagAssignment::deleteAll(['actor_id' => $actor->id]);
-    }
 
     /**
      * @throws \yii\db\StaleObjectException
