@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 use Besnovatyj\Actors\Module;
+use Besnovatyj\Validators\SlugValidator;
 
 /**
  * Yii2-конфиг модуля для движка yiisoft/config (группа `common` — общий для всех приложений).
@@ -15,9 +16,11 @@ use Besnovatyj\Actors\Module;
  * Содержит регистрацию модуля. Меню (adminMenu) и миграции остаются вкладами modman. Значения берутся
  * из статических методов {@see Module} — единый источник, без дублирования.
  *
- * URL-правила фронтенда — вклад в `frontendUrlManager` группы `common` (см. README_Yii2_Modules.md).
- * Перенесены из захардкоженного `frontend/config/url-manager.php`; первый сегмент роута капитализирован
- * под реальный id модуля 'Actors'. Гейтятся modman.
+ * URL-правила фронтенда — вклад в `frontendUrlManager` группы `common` (компонент есть и во фронте, и в
+ * бэкенде). Плоская грамматика, общая для контентных модулей: `<prefix>` — список, `<prefix>/<id:\d+>` —
+ * материал (всегда число), `<prefix>/<slug>` — раздел (лист дерева, без предков: слаг уникален по таблице).
+ * Паттерны слагов — только из констант {@see SlugValidator}: STRICT (первый символ — буква) там, где слаг
+ * делит сегмент с `<id:\d+>`, ANY — в собственном сегменте (`tag/…`). Гейтятся modman.
  */
 return [
     'modules' => [
@@ -30,12 +33,14 @@ return [
     'components' => [
         'frontendUrlManager' => [
             'rules' => [
-                'actors'                               => 'Actors/actor/index',
-                'actors/tag/<slug:[\w\-]+>/<page:\d+>' => 'Actors/actor/tag', // <page> — пагинация
-                'actors/tag/<slug:[\w\-]+>'            => 'Actors/actor/tag',
-                'actors/<slug:[\w\-]+>/<page:\d+>'     => 'Actors/actor/taxonomy', // <page> — пагинация
-                'actors/<slug:[\w\-]+>'                => 'Actors/actor/taxonomy',
-                'actors/<uuid:[\w\-]+>'                => 'Actors/actor/actor',
+                'actors'                                                     => 'Actors/actor/index',
+                'actors/tag/<slug:' . SlugValidator::SLUG_ANY . '>/<page:\d+>' => 'Actors/actor/tag', // <page> — пагинация
+                'actors/tag/<slug:' . SlugValidator::SLUG_ANY . '>'            => 'Actors/actor/tag',
+                // Карточка актёра — по числовому id; «красивый» адрес (`actors/anatoly-butor`) — алиас
+                // модуля route-alias (см. Module::aliasTargets()), а не слаг сущности.
+                'actors/<id:\d+>'                                            => 'Actors/actor/view',
+                'actors/<slug:' . SlugValidator::SLUG_STRICT . '>/<page:\d+>' => 'Actors/actor/taxonomy', // <page> — пагинация
+                'actors/<slug:' . SlugValidator::SLUG_STRICT . '>'            => 'Actors/actor/taxonomy',
             ],
         ],
     ],

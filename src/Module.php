@@ -14,6 +14,8 @@ use Besnovatyj\Contracts\module\ProvidesDependencies;
 use Besnovatyj\Contracts\module\ProvidesMigrations;
 use Besnovatyj\Contracts\module\ProvidesOptions;
 use Besnovatyj\Contracts\menu\MenuTarget;
+use Besnovatyj\Contracts\routing\AliasTarget;
+use Besnovatyj\Contracts\routing\AliasTargetProvider;
 use Besnovatyj\Contracts\menu\MenuTargetProvider;
 use Besnovatyj\Contracts\search\SearchSource;
 use Besnovatyj\Contracts\search\SearchableProvider;
@@ -27,6 +29,7 @@ use Besnovatyj\Contracts\tags\TagSource;
 use Besnovatyj\Actors\entities\actors\Actor;
 use Besnovatyj\Actors\entities\Taxonomy;
 use Besnovatyj\Actors\readModels\ActorReadRepository;
+use Besnovatyj\Actors\repositories\ActorRepository;
 use Besnovatyj\Actors\readModels\TaxonomyReadRepository;
 use Besnovatyj\TreeManager\Manager\TreeQueryScope;
 
@@ -34,7 +37,7 @@ class Module extends CmsModule implements
     DeclaresModule, ProvidesMigrations,
     ProvidesAdminMenu, ProvidesOptions,
     ProvidesDependencies, ProvidesDirectories, MenuTargetProvider, SearchableProvider,
-    SitemapProvider, SitemapFreshness, TaggableProvider
+    SitemapProvider, SitemapFreshness, TaggableProvider, AliasTargetProvider
 {
     public const bool EDITABLE = true;
     public const string VERSION = '1.0.0';
@@ -113,6 +116,53 @@ class Module extends CmsModule implements
         };
     }
 
+
+    /**
+     * Цели, которым можно назначить короткий URL (`actors/anatoly-butor` → карточка актёра по id).
+     * Реализация {@see AliasTargetProvider}; вызывается только модулем алиасов, если он установлен.
+     * Слага у актёра нет намеренно: красивый адрес — алиас, а не поле сущности.
+     *
+     * @return AliasTarget[]
+     */
+    public function aliasTargets(): array
+    {
+        return [
+            new AliasTarget('/Actors/actor/view', 'Актёр', 'id'),
+            new AliasTarget('/Actors/actor/taxonomy', 'Раздел актёров', 'slug'),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Для карточки актёра ключ — `id` (слага у актёра нет), подпись — имя; список в ручном порядке
+     * сортировки, без фильтра публикации — алиас заводят и черновику. Для разделов — карта слагов дерева,
+     * та же, что у меню.
+     *
+     * @return array<string,string>
+     */
+    public function aliasSlugs(string $route): array
+    {
+        return match (ltrim($route, '/')) {
+            'Actors/actor/view' => $this->actorIdMap(),
+            'Actors/actor/taxonomy' => $this->taxonomySlugMap(),
+            default => [],
+        };
+    }
+
+    /**
+     * Карта `id => имя` всех актёров в порядке сортировки.
+     *
+     * @return array<string,string>
+     */
+    private function actorIdMap(): array
+    {
+        $map = [];
+        foreach (new ActorRepository()->allInOrder() as $actor) {
+            $map[(string)$actor->id] = (string)$actor->name;
+        }
+        return $map;
+    }
 
     /**
      * Актёры — участники общего словаря тегов. Реализация {@see TaggableProvider}; вызывается модулем
