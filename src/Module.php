@@ -9,7 +9,6 @@ namespace Besnovatyj\Actors;
 use Besnovatyj\Contracts\module\ProvidesDirectories;
 use Besnovatyj\Kernel\module\CmsModule;
 use Besnovatyj\Contracts\module\DeclaresModule;
-use Besnovatyj\Contracts\module\ProvidesAdminMenu;
 use Besnovatyj\Contracts\module\ProvidesDependencies;
 use Besnovatyj\Contracts\module\ProvidesMigrations;
 use Besnovatyj\Contracts\module\ProvidesOptions;
@@ -35,7 +34,7 @@ use Besnovatyj\TreeManager\Manager\TreeQueryScope;
 
 class Module extends CmsModule implements
     DeclaresModule, ProvidesMigrations,
-    ProvidesAdminMenu, ProvidesOptions,
+    ProvidesOptions,
     ProvidesDependencies, ProvidesDirectories, MenuTargetProvider, SearchableProvider,
     SitemapProvider, SitemapFreshness, TaggableProvider, AliasTargetProvider
 {
@@ -47,7 +46,6 @@ class Module extends CmsModule implements
     public static function moduleVersion(): string { return self::VERSION; }
     public static function isEditable(): bool { return self::EDITABLE; }
     public static function moduleConfig(): array { return require __DIR__.'/config/config.php'; }
-    public static function adminMenu(): array { return require __DIR__.'/config/adminMenu.php'; }
     public static function options(): array { return require __DIR__.'/config/options.php'; }
     public static function dependencies(): array { return require __DIR__.'/config/dependencies.php'; }
     public static function migrationPath(): string { return __DIR__.'/migrations'; }
